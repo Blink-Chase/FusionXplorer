@@ -1,0 +1,2818 @@
+package com.example.tabfileexplorer
+
+import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.StatFs
+import android.os.storage.StorageManager
+import android.provider.Settings
+import android.util.Log
+import android.webkit.MimeTypeMap
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.AddHome
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.DataObject
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FolderShared
+import androidx.compose.material.icons.filled.FolderZip
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Slideshow
+import androidx.compose.material.icons.filled.Splitscreen
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.tabfileexplorer.data.AppSettings
+import com.example.tabfileexplorer.ui.theme.TabFileExplorerTheme
+import com.example.tabfileexplorer.navigation.NavGraph
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.util.Locale
+
+// --- Helper Composables for UI States (Permission, Loading, Empty) ---
+object NavRoutes {
+    const val HOME = "home"
+    const val FILE_EXPLORER = "file_explorer"
+    const val PATH_ARG = "path"
+}
+
+enum class ViewMode {
+    LIST, GRID
+}
+
+enum class SortMethod {
+    NAME, DATE, SIZE, TYPE
+}
+
+enum class SortOrder {
+    ASCENDING, DESCENDING
+}
+
+data class StorageStats(
+    val totalSpace: Long,
+    val freeSpace: Long
+) {
+    val usedSpace: Long
+        get() = totalSpace - freeSpace
+}
+
+// Data classes
+data class StorageOption(
+    val name: String,
+    val path: String,
+    val icon: ImageVector,
+    val iconTint: Color
+)
+
+private fun Context.getStorageStats(): StorageStats {
+    val stat = StatFs(Environment.getDataDirectory().path)
+    val blockSize = stat.blockSizeLong
+    val totalBlocks = stat.blockCountLong
+    val availableBlocks = stat.availableBlocksLong
+
+    return StorageStats(
+        totalSpace = totalBlocks * blockSize,
+        freeSpace = availableBlocks * blockSize
+    )
+}
+
+// FileUtils, FileModel, and extension functions are now expected from FileUtils.kt
+class MainActivity : ComponentActivity() {
+}
+    private lateinit var appSettings: AppSettings
+    private val manageStoragePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            Log.d("Permissions", "Returned from settings. Checking permission status.")
+            updatePermissionStates(true)
+        }
+
+    // --- All App State ---
+    private var fileListState by mutableStateOf<List<FileModel>>(emptyList())
+    private var currentPathState by mutableStateOf("")
+    private var permissionDeniedState by mutableStateOf(false)
+    private var hasSystemManagerPermissionState by mutableStateOf(false)
+    private var isLoading by mutableStateOf(false)
+    private var showCreateFolderDialog by mutableStateOf(false)
+    private var newFolderName by mutableStateOf("")
+    private var selectedFileForAction by mutableStateOf<FileModel?>(null)
+    private var showOptionsMenuForFile by mutableStateOf<FileModel?>(null) // ADDED: State for options menu
+    private var showConfirmDeleteDialog by mutableStateOf(false)
+    private var searchQuery by mutableStateOf("")
+    private var isSearchActive by mutableStateOf(false)
+    private var viewMode by mutableStateOf(ViewMode.LIST)
+    private var selectedFiles by mutableStateOf<Set<FileModel>>(emptySet())
+    private var showSelectionMoreMenu by mutableStateOf(false)
+    private var showConfirmMultiDeleteDialog by mutableStateOf(false)
+    private var showPropertiesDialog by mutableStateOf(false)
+    private var fileForPropertiesDialog by mutableStateOf<FileModel?>(null)
+    private var sortMethod by mutableStateOf(SortMethod.NAME)
+    private var sortOrder by mutableStateOf(SortOrder.ASCENDING)
+    private var showSortMenu by mutableStateOf(false)
+    private var isSplitScreenActive by mutableStateOf(false)
+    private var rightPanelPath by mutableStateOf("")
+    private var rightPanelFileList by mutableStateOf<List<FileModel>>(emptyList())
+    private var clipboardData: Pair<String, Boolean>? = null // path to file and isCut flag
+    private var showRenameDialog by mutableStateOf(false)
+    private var newFileName by mutableStateOf("")
+    private var isAtRoot by mutableStateOf(true)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        appSettings = AppSettings(this)
+        updatePermissionStates()
+
+        setContent {
+            // Collect theme preference
+            val isDarkTheme by appSettings.themePreference.collectAsState(initial = false)
+            
+            TabFileExplorerTheme(darkTheme = isDarkTheme) {
+                // Create nav controller
+                val navController = rememberNavController()
+                
+                // Setup navigation
+                NavGraph(
+                    navController = navController,
+                    appSettings = appSettings
+                )
+            }
+            // Collect theme preference
+            val isDarkTheme by appSettings.themePreference.collectAsState(initial = false)
+            
+            TabFileExplorerTheme(darkTheme = isDarkTheme) {
+                // Create nav controller
+                val navController = rememberNavController()
+                
+                // Setup navigation
+                NavGraph(
+                    navController = navController,
+                    appSettings = appSettings
+                )
+            }
+            // Collect theme preference
+            val isDarkTheme by appSettings.themePreference.collectAsState(initial = false)
+            
+            TabFileExplorerTheme(darkTheme = isDarkTheme) {
+                // Create nav controller
+                val navController = rememberNavController()
+                
+                // Setup navigation
+                NavGraph(
+                    navController = navController,
+                    appSettings = appSettings
+                )
+            }
+            TabFileExplorerTheme {
+                val navController = rememberNavController()
+                val filteredAndSortedList =
+                    remember(searchQuery, fileListState, sortMethod, sortOrder) {
+                        val filtered = if (searchQuery.isBlank()) {
+                            fileListState
+                        } else {
+                            fileListState.filter {
+                                it.name.contains(searchQuery, ignoreCase = true)
+                            }
+                        }
+                        // Now, sort the filtered list
+                        val sorted = when (sortMethod) {
+                            SortMethod.NAME -> filtered.sortedBy { it.name.lowercase(Locale.getDefault()) }
+                            SortMethod.DATE -> filtered.sortedBy { it.lastModified }
+                            SortMethod.SIZE -> filtered.sortedBy { it.size }
+                            SortMethod.TYPE -> filtered.sortedBy {
+                                it.name.substringAfterLast(
+                                    '.',
+                                    ""
+                                ).lowercase(Locale.getDefault())
+                            }
+                        }
+
+                        // Finally, apply the ascending/descending order
+                        val result =
+                            if (sortOrder == SortOrder.DESCENDING) {
+                                sorted.reversed()
+                            } else {
+                                sorted
+                            }
+                        // This is the crucial last step: always put directories first.
+                        result.sortedBy { !it.isDirectory }
+                    }
+
+                // Set up the NavHost to manage screens
+                NavHost(
+                    navController = navController,
+                    startDestination = NavRoutes.HOME
+                ) {
+                    // Route for the "home" screen
+                    composable(NavRoutes.HOME) {
+                        HomeScreen(onNavigateToStorage = { storagePath ->
+                            val encodedPath =
+                                URLEncoder.encode(storagePath, StandardCharsets.UTF_8.toString())
+                            navController.navigate("${NavRoutes.FILE_EXPLORER}/$encodedPath")
+                        })
+                    }
+
+                    // Route for the "file_explorer" screen
+                    composable(
+                        route = "${NavRoutes.FILE_EXPLORER}/{${NavRoutes.PATH_ARG}}",
+                        arguments = listOf(navArgument(NavRoutes.PATH_ARG) {
+                            type = NavType.StringType
+                        })
+                    ) { backStackEntry ->
+                        val path = URLDecoder.decode(
+                            backStackEntry.arguments?.getString(NavRoutes.PATH_ARG) ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+
+                        // Pass all the necessary data and functions to the File Explorer screen.
+                        MainAppContent(
+                            initialPath = path,
+                            fileList = filteredAndSortedList,
+                            currentPath = currentPathState,
+                            isLoading = isLoading,
+                            permissionDenied = permissionDeniedState,
+                            hasSystemManagerPermission = hasSystemManagerPermissionState,
+                            viewMode = viewMode,
+                            onViewModeChange = { newMode -> viewMode = newMode },
+                            selectedFiles = selectedFiles,
+                            onSelectionChange = { file ->
+                                selectedFiles =
+                                    if (selectedFiles.contains(file)) selectedFiles - file
+                                    else selectedFiles + file
+                            },
+                            onClearSelection = { selectedFiles = emptySet() },
+                            showSelectionMoreMenu = showSelectionMoreMenu,
+                            onShowSelectionMoreMenu = { showSelectionMoreMenu = true },
+                            onDismissSelectionMoreMenu = { showSelectionMoreMenu = false },
+                            showOptionsMenuForFile = showOptionsMenuForFile,
+                            isSearchActive = isSearchActive,
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = { newQuery -> searchQuery = newQuery },
+                            onSearchActiveChange = { isActive -> isSearchActive = isActive },
+                            onLoadFiles = { newPath ->
+                                searchQuery = ""
+                                isSearchActive = false
+                                selectedFiles = emptySet()
+                                loadFiles(newPath)
+                            },
+                            onNavigateUp = {
+                                searchQuery = ""
+                                isSearchActive = false
+                                selectedFiles = emptySet()
+                                navigateUp()
+                            },
+                            onNavigateHome = {
+                                navController.popBackStack(
+                                    NavRoutes.HOME,
+                                    inclusive = false
+                                )
+                            },
+                            onOpenFile = { file -> openFile(file) },
+                            onShowOptionsMenu = { file -> showOptionsMenuForFile = file },
+                            onDismissOptionsMenu = { showOptionsMenuForFile = null },
+                            onShowCreateFolderDialog = {
+                                newFolderName = ""
+                                showCreateFolderDialog = true
+                            },
+                            onDeleteFileAction = { file ->
+                                selectedFileForAction = file
+                                showConfirmDeleteDialog = true
+                                showOptionsMenuForFile = null
+                            },
+                            onRenameFileClickAction = {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Rename coming soon!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            onDeleteSelectedFiles = { showConfirmMultiDeleteDialog = true },
+                            onShareFiles = { file ->
+                                // If a specific file is provided, share it. Otherwise, share the multi-selection.
+                                if (file != null) {
+                                    shareFiles(setOf(file))
+                                } else {
+                                    shareFiles(selectedFiles)
+                                }
+                            },
+                            onShowProperties = { file ->
+                                // This now handles both cases
+                                fileForPropertiesDialog = file
+                                showPropertiesDialog = true
+                            },
+                            onOpenSettings = { openAppSettingsToGrantPermission() },
+                            sortMethod = sortMethod,
+                            sortOrder = sortOrder,
+                            onSortMethodChange = { sortMethod = it },
+                            onSortOrderChange = { sortOrder = it },
+                            showSortMenu = showSortMenu,
+                            onShowSortMenuChange = { showSortMenu = it },
+                            onToggleSplitScreen = { isSplitScreenActive = !isSplitScreenActive },
+                            isSplitScreenActive = isSplitScreenActive
+                        )
+                    }
+                }
+
+                if (showCreateFolderDialog) {
+                    CreateFolderDialog(
+                        folderName = newFolderName,
+                        onFolderNameChange = { newFolderName = it },
+                        onDismissRequest = { showCreateFolderDialog = false; newFolderName = "" },
+                        onCreateClick = {
+                            showCreateFolderDialog = false
+                            createNewFolderInCurrentPath(newFolderName.trim())
+                        },
+                        onCancelClick = { showCreateFolderDialog = false; newFolderName = "" }
+                    )
+                }
+
+                if (showConfirmDeleteDialog && selectedFileForAction != null) {
+                    ConfirmDeleteDialog(
+                        file = selectedFileForAction!!,
+                        onConfirm = {
+                            deleteFileOrFolder(selectedFileForAction!!)
+                            showConfirmDeleteDialog = false
+                            selectedFileForAction = null
+                        },
+                        onDismiss = {
+                            showConfirmDeleteDialog = false
+                            selectedFileForAction = null
+                        }
+                    )
+                }
+                if (showConfirmMultiDeleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showConfirmMultiDeleteDialog = false },
+                        title = { Text("Confirm Delete") },
+                        text = { Text("Are you sure you want to delete ${selectedFiles.size} item(s)? This cannot be undone.") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    deleteSelectedFiles()
+                                    showConfirmMultiDeleteDialog = false
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text("Delete")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showConfirmMultiDeleteDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+                if (showPropertiesDialog) {
+                    // If we have a specific file to show from the single-item menu...
+                    if (fileForPropertiesDialog != null) {
+                        PropertiesDialog(
+                            // Pass an empty set for selectedFiles to ensure it uses the single-item logic
+                            selectedFiles = emptySet(),
+                            fileToShow = fileForPropertiesDialog,
+                            onDismissRequest = {
+                                showPropertiesDialog = false
+                                fileForPropertiesDialog = null // Clean up the state
+                            }
+                        )
+                    }
+                    // Otherwise, if there are multiple files selected...
+                    else if (selectedFiles.isNotEmpty()) {
+                        PropertiesDialog(
+                            selectedFiles = selectedFiles,
+                            fileToShow = null, // Ensure it uses the multi-select logic
+                            onDismissRequest = { showPropertiesDialog = false }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updatePermissionStates(true)
+    }
+
+    private fun updatePermissionStates(forceReload: Boolean = false) {
+        val oldPermissionDeniedState = permissionDeniedState
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager().also { hasSystemManagerPermissionState = it }
+        } else {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+
+        permissionDeniedState = !hasPermission
+        Log.d("Permissions", "Permission check complete. Denied: $permissionDeniedState")
+        if ((oldPermissionDeniedState && hasPermission) || (forceReload && hasPermission)) {
+            val pathToLoad = currentPathState.ifBlank { FileUtils.getRootDirectory().absolutePath }
+            Log.d(
+                "Permissions",
+                "Permission newly granted or resumed, reloading for path: $pathToLoad"
+            )
+            loadFiles(pathToLoad)
+        }
+    }
+
+    private fun openAppSettingsToGrantPermission() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                data = "package:$packageName".toUri()
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = "package:$packageName".toUri()
+            }
+        }
+        manageStoragePermissionLauncher.launch(intent)
+    }
+
+    private fun loadFiles(path: String) {
+        // Update isAtRoot state based on the new path
+        isAtRoot = path == Environment.getExternalStorageDirectory().absolutePath
+        
+        if (path.isBlank() || permissionDeniedState) {
+            Log.w("LoadFiles", "Aborted load for path '$path'. Blank path or permission denied.")
+            return
+        }
+        isLoading = true
+        lifecycleScope.launch {
+            fileListState = try {
+                val files = withContext(Dispatchers.IO) { FileUtils.getFiles(path) }
+                currentPathState = path
+                files
+            } catch (e: Exception) {
+                Log.e("LoadFiles", "Error loading files for path $path", e)
+                emptyList()
+            }
+            isLoading = false
+        }
+    }
+
+
+    
+    private fun navigateUp() {
+        val currentFile = File(currentPathState)
+        val parent = currentFile.parentFile ?: return
+        
+        // Check if we're navigating up to the root
+        if (parent.absolutePath == Environment.getExternalStorageDirectory().absolutePath) {
+            isAtRoot = true
+        }
+        
+        if (parent.canRead()) {
+            loadFiles(parent.absolutePath)
+        }
+    }
+
+    private fun createNewFolderInCurrentPath(folderName: String) {
+        if (folderName.isBlank()) {
+            Toast.makeText(this, "Folder name cannot be empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) { File(currentPathState, folderName).mkdir() }
+            loadFiles(currentPathState)
+        }
+    }
+
+    private fun deleteFileOrFolder(fileModel: FileModel) {
+        lifecycleScope.launch {
+            val success = withContext(Dispatchers.IO) { File(fileModel.path).deleteRecursively() }
+            if (success) {
+                Toast.makeText(this@MainActivity, "Deleted '${fileModel.name}'", Toast.LENGTH_SHORT)
+                    .show()
+                loadFiles(currentPathState)
+            } else {
+                Toast.makeText(this@MainActivity, "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun deleteSelectedFiles() {
+        val filesToDelete = selectedFiles.toList() // Create a stable copy
+        if (filesToDelete.isEmpty()) return
+
+        lifecycleScope.launch {
+            var successCount = 0
+            withContext(Dispatchers.IO) {
+                filesToDelete.forEach { fileModel ->
+                    if (File(fileModel.path).deleteRecursively()) {
+                        successCount++
+                    }
+                }
+            }
+
+            Toast.makeText(this@MainActivity, "$successCount  item(s) deleted", Toast.LENGTH_SHORT)
+                .show()
+            selectedFiles = emptySet() // Clear the selection
+            loadFiles(currentPathState) // Refresh the file list
+        }
+    }
+
+    private fun openFile(fileModel: FileModel) {
+        val file = File(fileModel.path)
+        if (!file.exists()) {
+            Toast.makeText(this, "File does not exist.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val uri = FileProvider.getUriForFile(this, "${this.packageName}.provider", file)
+            val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, mimeType)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("OpenFile", "No app can open this file.", e)
+            Toast.makeText(this, "No application found to open this file.", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun shareFiles(filesToShare: Set<FileModel>) {
+        if (filesToShare.isEmpty()) {
+            Toast.makeText(this, "No files selected to share.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uris = filesToShare.mapNotNull { fileModel ->
+            try {
+                val file = File(fileModel.path)
+                if (file.exists()) {
+                    FileProvider.getUriForFile(this, "${this.packageName}.provider", file)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("Share", "Error getting URI for file: ${fileModel.path}", e)
+                null
+            }
+        }.toCollection(ArrayList()) // Convert to ArrayList, which is required by the Intent
+
+        if (uris.isEmpty()) {
+            Toast.makeText(this, "Could not share the selected files.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent().apply {
+            // Use ACTION_SEND_MULTIPLE for sharing more than one file
+            action = if (uris.size > 1) Intent.ACTION_SEND_MULTIPLE else Intent.ACTION_SEND
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            if (uris.size > 1) {
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                // Determine a general MIME type
+                type = "*/*"
+            } else {
+                val singleUri = uris.first()
+                putExtra(Intent.EXTRA_STREAM, singleUri)
+                // Get a specific MIME type for a single file
+                type = contentResolver.getType(singleUri) ?: "*/*"
+            }
+        }
+
+        // Create a chooser to let the user pick an app
+        val chooser = Intent.createChooser(intent, "Share with...")
+        try {
+            startActivity(chooser)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No application found to handle sharing.", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun showRenameDialog(fileModel: FileModel) {
+        selectedFileForAction = fileModel
+        // Set the initial name without extension if it has one
+        newFileName = if (fileModel.name.contains('.')) {
+            fileModel.name.substringBeforeLast('.')
+        } else {
+            fileModel.name
+        }
+        showRenameDialog = true
+    }
+
+    private fun copyPathToClipboard(path: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("File Path", path)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, "Path copied to clipboard", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun renameFile() {
+        val oldFile = selectedFileForAction ?: return
+        val oldFileObj = File(oldFile.path)
+
+        // Determine the new name with extension
+        val hasExtension = oldFile.name.contains('.')
+        val extension = if (hasExtension) ".${oldFile.name.substringAfterLast('.')}" else ""
+        val newName = if (hasExtension && !newFileName.endsWith(extension)) {
+            "$newFileName$extension"
+        } else {
+            newFileName
+        }
+
+        val newFile = File(oldFileObj.parent, newName)
+
+        lifecycleScope.launch {
+            try {
+                val success = withContext(Dispatchers.IO) {
+                    // Check if the new name already exists
+                    if (newFile.exists() && newFile.absolutePath != oldFileObj.absolutePath) {
+                        return@withContext false
+                    }
+                    oldFileObj.renameTo(newFile)
+                }
+
+                if (success) {
+                    loadFiles(currentPathState)
+                    showRenameDialog = false
+                    selectedFileForAction = null
+                    newFileName = ""
+                    Toast.makeText(this@MainActivity, "Renamed successfully", Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Failed to rename. The file may be in use or a file with that name already exists.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e("RenameError", "Error renaming file", e)
+                Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun copyToClipboard(file: FileModel) {
+        clipboardData = file.path to false // false means copy operation
+        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun cutToClipboard(file: FileModel) {
+        clipboardData = file.path to true // true means cut operation
+        Toast.makeText(this, "Cut to clipboard", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun pasteFromClipboard(
+        destinationDir: File? = null,
+        snackbarHostState: SnackbarHostState
+    ) {
+        val (sourcePath, isCut) = clipboardData ?: return
+        val sourceFile = File(sourcePath)
+        val targetDir = destinationDir ?: File(currentPathState)
+        val destinationFile = File(targetDir, sourceFile.name)
+
+        // Dismiss the snackbar when pasting
+        lifecycleScope.launch {
+            try {
+                // Dismiss the snackbar
+                snackbarHostState.currentSnackbarData?.dismiss()
+
+                withContext(Dispatchers.IO) {
+                    if (isCut) {
+                        // Move operation
+                        if (sourceFile.renameTo(destinationFile)) {
+                            // Update UI
+                            withContext(Dispatchers.Main) {
+                                loadFiles(currentPathState)
+                                // If we cut from a different directory, refresh that directory too
+                                if (sourceFile.parent != currentPathState) {
+                                    sourceFile.parent?.let { parentPath ->
+                                        loadFiles(parentPath)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Copy operation
+                        if (sourceFile.isDirectory) {
+                            sourceFile.copyRecursively(destinationFile, overwrite = true)
+                        } else {
+                            sourceFile.copyTo(destinationFile, overwrite = true)
+                        }
+                        // Refresh current directory
+                        withContext(Dispatchers.Main) {
+                            loadFiles(currentPathState)
+                        }
+                    }
+                }
+                // Clear clipboard after successful paste if it was a cut operation
+                if (isCut) {
+                    clipboardData = null
+                }
+                // Show success message in snackbar
+                snackbarHostState.showSnackbar(
+                    message = "Pasted to ${targetDir.name}",
+                    duration = SnackbarDuration.Short
+                )
+            } catch (e: Exception) {
+                Log.e("PasteError", "Error pasting file", e)
+                // Show error in snackbar
+                snackbarHostState.showSnackbar(
+                    message = "Error: ${e.message ?: "Failed to paste"}",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    // --- Helper Composables for UI States (Permission, Loading, Empty) ---
+    @Composable
+    fun MainAppContent(
+        initialPath: String,
+        fileList: List<FileModel>,
+        currentPath: String,
+        isLoading: Boolean,
+        permissionDenied: Boolean,
+        hasSystemManagerPermission: Boolean,
+        viewMode: ViewMode,
+        onViewModeChange: (ViewMode) -> Unit,
+        selectedFiles: Set<FileModel>,
+        onSelectionChange: (FileModel) -> Unit,
+        onClearSelection: () -> Unit,
+        showSelectionMoreMenu: Boolean,
+        onShowSelectionMoreMenu: () -> Unit,
+        onDismissSelectionMoreMenu: () -> Unit,
+        showOptionsMenuForFile: FileModel?,
+        isSearchActive: Boolean,
+        searchQuery: String,
+        onSearchQueryChange: (String) -> Unit,
+        onSearchActiveChange: (Boolean) -> Unit,
+        onLoadFiles: (String) -> Unit,
+        onNavigateUp: () -> Unit,
+        onNavigateHome: () -> Unit,
+        onOpenFile: (FileModel) -> Unit,
+        onShowOptionsMenu: (FileModel) -> Unit,
+        onDismissOptionsMenu: () -> Unit,
+        onShowCreateFolderDialog: () -> Unit,
+        onDeleteFileAction: (FileModel) -> Unit,
+        onRenameFileClickAction: (FileModel) -> Unit,
+        onDeleteSelectedFiles: () -> Unit,
+        onShareFiles: (FileModel?) -> Unit,
+        onShowProperties: (file: FileModel?) -> Unit,
+        onOpenSettings: () -> Unit,
+        sortMethod: SortMethod,
+        sortOrder: SortOrder,
+        onSortMethodChange: (SortMethod) -> Unit,
+        onSortOrderChange: (SortOrder) -> Unit,
+        showSortMenu: Boolean,
+        onShowSortMenuChange: (Boolean) -> Unit,
+        onToggleSplitScreen: () -> Unit,
+        isSplitScreenActive: Boolean
+    ) {
+        val isRPlus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        val context = LocalContext.current
+        val isAtRoot = currentPath == Environment.getExternalStorageDirectory().absolutePath
+
+        // This effect runs when the screen appears or its path/permissions change.
+        LaunchedEffect(initialPath, hasSystemManagerPermission) {
+            if (!permissionDenied && (if (isRPlus) hasSystemManagerPermission else true)) {
+                Log.d("MainAppContent", "LaunchedEffect: Loading files for path: $initialPath")
+                onLoadFiles(initialPath)
+            }
+        }
+
+        // --- UI State Logic: Decide what to show (permission, loading, content) ---
+        when {
+            permissionDenied -> {
+                Log.d("UIState", "Displaying 'All Files Access Denied' screen.")
+                PermissionDeniedScreen(onOpenSettingsClick = onOpenSettings)
+            }
+
+            isRPlus && !hasSystemManagerPermission -> {
+                RequestPermissionScreen(onGrantSettingsClick = onOpenSettings)
+            }
+
+            isAtRoot -> {
+                // Show HomeScreen when at root directory
+                HomeScreen(
+                    onNavigateToStorage = onLoadFiles,
+                    onSettingsClick = onOpenSettings,
+                    onAboutClick = { /* TODO: Handle about click */ }
+                )
+            }
+
+            else -> {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // --- Left Panel (Always Visible) ---
+                    Box(modifier = Modifier.weight(1f)) {
+                        FileListScreen(
+                            files = fileList,
+                            currentPath = currentPath,
+                            onFileClick = onLoadFiles,
+                            onNavigateUp = onNavigateUp,
+                            modifier = Modifier,
+                            context = context,
+                            isSearchActive = isSearchActive,
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = onSearchQueryChange,
+                            onSearchActiveChange = onSearchActiveChange,
+                            viewMode = viewMode,
+                            onViewModeChange = onViewModeChange,
+                            selectedFiles = selectedFiles,
+                            onSelectionChange = onSelectionChange,
+                            onClearSelection = onClearSelection,
+                            showSelectionMoreMenu = showSelectionMoreMenu,
+                            onShowSelectionMoreMenu = onShowSelectionMoreMenu,
+                            onDismissSelectionMoreMenu = onDismissSelectionMoreMenu,
+                            showOptionsMenuForFile = showOptionsMenuForFile,
+                            onShowOptionsMenu = onShowOptionsMenu,
+                            onDismissOptionsMenu = onDismissOptionsMenu,
+                            onOpenFileClickAction = onOpenFile,
+                            onRenameFileClickAction = { file ->
+                                // TODO: Implement rename functionality
+                                onDismissOptionsMenu()
+                            },
+                            onDeleteFileClickAction = { file ->
+                                onDeleteFileAction(file)
+                                onDismissOptionsMenu()
+                            },
+                            onDeleteSelectedFiles = onDeleteSelectedFiles,
+                            onShareFiles = { file ->
+                                onShareFiles(file)
+                            },
+                            onShowProperties = { file ->
+                                onShowProperties(
+                                    file ?: showOptionsMenuForFile
+                                )
+                            },
+                            sortMethod = sortMethod,
+                            sortOrder = sortOrder,
+                            onSortMethodChange = onSortMethodChange,
+                            onSortOrderChange = onSortOrderChange,
+                            showSortMenu = showSortMenu,
+                            onShowSortMenuChange = onShowSortMenuChange,
+                            onToggleSplitScreen = { /* TODO: Implement split screen toggle */ },
+                            isSplitScreenActive = false
+                        )
+
+                        // Overlays for the left panel
+                        if (isLoading) {
+                            LoadingIndicatorOverlay()
+                        } else if (fileList.isEmpty() && currentPath.isNotBlank()) {
+                            EmptyFolderView(
+                                currentPath = currentPath,
+                                onCreateFolderClick = onShowCreateFolderDialog
+                            )
+                        }
+                    }
+
+                    // --- Right Panel (Conditionally Visible) ---
+                    if (isSplitScreenActive) {
+                        VerticalDivider(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(1.dp), color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
+                        Box(modifier = Modifier.weight(1f)) {
+                            // This is a NEW FileListScreen instance for the right side.
+                            // For now, it will be a read-only clone of the left side.
+                            FileListScreen(
+                                files = fileList, // Shows the same files for now
+                                currentPath = currentPath, // Shows the same path for now
+                                context = context,
+                                // Disable most actions on the right panel for simplicity
+                                onFileClick = {},
+                                onNavigateUp = {},
+                                isSearchActive = false,
+                                searchQuery = "",
+                                onSearchQueryChange = {},
+                                onSearchActiveChange = {},
+                                viewMode = viewMode,
+                                onViewModeChange = {},
+                                selectedFiles = emptySet(),
+                                onSelectionChange = {},
+                                onClearSelection = {},
+                                showSelectionMoreMenu = false,
+                                onShowSelectionMoreMenu = {},
+                                onDismissSelectionMoreMenu = {},
+                                showOptionsMenuForFile = null,
+                                onShowOptionsMenu = {},
+                                onDismissOptionsMenu = {},
+                                onOpenFileClickAction = onOpenFile, // Still allow opening files
+                                onRenameFileClickAction = {},
+                                onDeleteSelectedFiles = {},
+                                onDeleteFileClickAction = {},
+                                onShareFiles = {},
+                                onShowProperties = {},
+                                sortMethod = sortMethod,
+                                sortOrder = sortOrder,
+                                onSortMethodChange = {},
+                                onSortOrderChange = {},
+                                showSortMenu = false,
+                                onShowSortMenuChange = {},
+                                onToggleSplitScreen = {}, // Hide the button on the right panel
+                                isSplitScreenActive = isSplitScreenActive
+                            )
+                        }
+                    }
+                    if (showRenameDialog && selectedFileForAction != null) {
+                        RenameDialog(
+                            currentFile = selectedFileForAction!!,
+                            newFileName = newFileName,
+                            onNewFileNameChange = { newFileName = it },
+                            onDismiss = {
+                                showRenameDialog = false
+                                selectedFileForAction = null
+                                newFileName = ""
+                            },
+                            onConfirm = {
+                                // Add the extension back before renaming
+                                val hasExtension =
+                                    selectedFileForAction?.name?.contains('.') ?: false
+                                val extension = if (hasExtension) ".${
+                                    selectedFileForAction?.name?.substringAfterLast('.')
+                                }" else ""
+
+                                if (hasExtension && !newFileName.endsWith(extension)) {
+                                    newFileName += extension
+                                }
+                                renameFile()
+                            },
+                            isNameValid = newFileName.isNotBlank() &&
+                                    newFileName != selectedFileForAction?.name?.substringBeforeLast(
+                                '.',
+                                missingDelimiterValue = selectedFileForAction?.name ?: ""
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun PermissionDeniedScreen(onOpenSettingsClick: () -> Unit) {
+        Surface( // Wrap with Surface
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background // Explicitly use theme background
+        ) {
+            Box(
+                // modifier = Modifier.fillMaxSize(), // Box might not need fillMaxSize if Surface has it
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = "Permission Denied Icon",
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "All Files Access Denied",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Text(
+                        "File explorer needs this permission to function. Please grant it in settings.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        // For body text on a generic background, onSurface or onBackground is often more appropriate than onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onBackground, // Or onSurface
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = onOpenSettingsClick) {
+                        Text("Open Settings")
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun RequestPermissionScreen(onGrantSettingsClick: () -> Unit) {
+        Surface( // Wrap with Surface
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background // Explicitly use theme background
+        ) {
+            Box(
+                // modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.FolderShared,
+                        contentDescription = "Request Permission Icon",
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Grant All Files Access",
+                        style = MaterialTheme.typography.titleMedium,
+                        // Text on a generic background, consider onBackground or onSurface
+                        color = MaterialTheme.colorScheme.onBackground // Or onSurface
+                    )
+                    Text(
+                        "This app needs 'All Files Access' to browse your storage effectively.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        // Text on a generic background
+                        color = MaterialTheme.colorScheme.onBackground, // Or onSurfaceVariant if you want it slightly dimmer
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = onGrantSettingsClick) {
+                        Text("Grant in Settings")
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun LoadingIndicatorOverlay() { // Content description not typically needed for a purely visual busy indicator
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(enabled = false, onClick = {}) // Consume clicks
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(48.dp))
+        }
+    }
+
+    @Composable
+    fun EmptyFolderView(currentPath: String, onCreateFolderClick: () -> Unit) { // Added callback
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Inbox, // Or Icons.Filled.FolderOpen
+                    contentDescription = "Empty Folder Icon", // Accessibility
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                val isReadable = FileUtils.isPathReadable(currentPath)
+                Text(
+                    if (!isReadable) "Cannot read this folder."
+                    else "This folder is empty.",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (!isReadable) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (isReadable) { // Only show "Create New Folder" if the current path is readable
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(onClick = onCreateFolderClick) { // Using TextButton for less emphasis
+                        Icon(
+                            Icons.Filled.CreateNewFolder,
+                            contentDescription = "Create New Folder Icon", // Accessibility
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text("Create New Folder")
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun PreparingStateView() {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(36.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "Preparing file explorer...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HomeScreen(
+        onNavigateToSettings: () -> Unit,
+        onNavigateToDirectory: (String) -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        val context = LocalContext.current
+        val storageStats = remember { mutableStateOf<StorageStats?>(null) }
+        val rootPath = Environment.getExternalStorageDirectory().absolutePath
+        
+        // Storage options (internal storage, downloads, etc.)
+        val storageOptions = listOf(
+            StorageOption(
+                name = "Internal Storage",
+                path = rootPath,
+                icon = Icons.Filled.Storage,
+                iconTint = MaterialTheme.colorScheme.primary
+            ),
+            StorageOption(
+                name = "Downloads",
+                path = "${Environment.getExternalStorageDirectory()}/Download",
+                icon = Icons.Filled.Download,
+                iconTint = MaterialTheme.colorScheme.primary
+            )
+        )
+        
+        // Get storage stats asynchronously
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val stats = context.getStorageStats()
+                    withContext(Dispatchers.Main) {
+                        storageStats.value = stats
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeScreen", "Error getting storage stats", e)
+                }
+            }
+        }
+    ) {
+        val context = LocalContext.current
+        val storageStats = remember { mutableStateOf<StorageStats?>(null) }
+        val rootPath = Environment.getExternalStorageDirectory().absolutePath
+        
+        // Storage options (internal storage, downloads, etc.)
+        val storageOptions = listOf(
+            StorageOption(
+                name = "Internal Storage",
+                path = rootPath,
+                icon = Icons.Filled.Storage,
+                iconTint = MaterialTheme.colorScheme.primary
+            ),
+            StorageOption(
+                name = "Downloads",
+                path = "${Environment.getExternalStorageDirectory()}/Download",
+                icon = Icons.Filled.Download,
+                iconTint = MaterialTheme.colorScheme.primary
+            )
+        )
+        
+        // Get storage stats asynchronously
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val stats = context.getStorageStats()
+                    withContext(Dispatchers.Main) {
+                        storageStats.value = stats
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeScreen", "Error getting storage stats", e)
+                }
+            }
+        }
+    ) {
+        val context = LocalContext.current
+        val storageStats = remember { mutableStateOf<StorageStats?>(null) }
+        val rootPath = Environment.getExternalStorageDirectory().absolutePath
+        
+        // Storage options (internal storage, downloads, etc.)
+        val storageOptions = listOf(
+            StorageOption(
+                name = "Internal Storage",
+                path = rootPath,
+                icon = Icons.Filled.Storage,
+                iconTint = MaterialTheme.colorScheme.primary
+            ),
+            StorageOption(
+                name = "Downloads",
+                path = "${Environment.getExternalStorageDirectory()}/Download",
+                icon = Icons.Filled.Download,
+                iconTint = MaterialTheme.colorScheme.primary
+            )
+        )
+
+        // Get storage stats asynchronously
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val stats = context.getStorageStats()
+                    withContext(Dispatchers.Main) {
+                        storageStats.value = stats
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeScreen", "Error getting storage stats", e)
+                }
+            }
+        }
+
+        // Storage options (internal storage, downloads, etc.)
+        val storageOptions = listOf(
+            StorageOption(
+                name = "Internal Storage",
+                path = rootPath,
+                icon = Icons.Filled.Storage,
+                iconTint = MaterialTheme.colorScheme.primary
+            ),
+            StorageOption(
+                name = "Downloads",
+                path = rootPath, // Changed to root path
+                icon = Icons.Filled.Download,
+                iconTint = MaterialTheme.colorScheme.primary
+            )
+            // Add more storage options as needed
+        )
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "TabFileExplorer",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    actions = {
+                        IconButton(onClick = onNavigateToSettings) {
+                            Icon(Icons.Default.Settings, "Settings")
+                        }
+                        IconButton(onClick = onNavigateUp) {
+                            Icon(Icons.Default.ArrowBack, "Navigate up")
+                        }
+                    }
+                )
+            },
+            modifier = modifier
+        ) { innerPadding ->
+{{ ... }}
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(storageOptions) { option ->
+                                QuickAccessItem(
+                                    option = option,
+                                    onClick = { onNavigateToDirectory(option.path) }
+                                )
+                            }
+                        }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            "Recent Files",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        // Placeholder for recent files list
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                                .clip(MaterialTheme.shapes.medium),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No recent files",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // About Section
+                item {
+                    Card(
+                        onClick = onAboutClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    "About TabFileExplorer",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    "Version 1.0.0",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "More info",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun StorageOverviewCard(
+        usedSpace: Long,
+        totalSpace: Long,
+        onManageClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        val usedGb = usedSpace / (1024 * 1024 * 1024f)
+        val totalGb = totalSpace / (1024 * 1024 * 1024f)
+        val progress = (usedGb / totalGb).coerceIn(0f, 1f)
+
+        Card(
+            onClick = onManageClick,
+            modifier = modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Storage",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        "${"%.1f".format(usedGb)} GB of ${"%.1f".format(totalGb)} GB used",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(CircleShape),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Available: ${"%.1f".format(totalGb - usedGb)} GB",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Text(
+                        "${(progress * 100).toInt()}% used",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun QuickAccessItem(
+        option: StorageOption,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        Card(
+            onClick = onClick,
+            modifier = modifier
+                .width(120.dp)
+                .height(100.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = option.icon,
+                    contentDescription = null,
+                    tint = option.iconTint,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = option.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+
+    // --- PREVIEW for HomeScreen ---
+    @Preview(showBackground = true)
+    @Composable
+    fun PreviewHomeScreen() {
+        TabFileExplorerTheme {
+            HomeScreen(onNavigateToStorage = {})
+        }
+    }
+
+    // --- FileListScreen - Main UI Composables (FileItem, getFileIcon) ---
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+    @Composable
+    fun FileListScreen(
+        files: List<FileModel>,
+        currentPath: String,
+        onFileClick: (String) -> Unit,
+        onNavigateUp: () -> Unit,
+        modifier: Modifier = Modifier,
+        context: Context,
+        // Search State
+        isSearchActive: Boolean,
+        searchQuery: String,
+        onSearchQueryChange: (String) -> Unit,
+        onSearchActiveChange: (Boolean) -> Unit,
+        // View Mode State
+        viewMode: ViewMode,
+        onViewModeChange: (ViewMode) -> Unit,
+        // --- SELECTION STATE PARAMETERS ---
+        selectedFiles: Set<FileModel>,
+        onSelectionChange: (FileModel) -> Unit,
+        onClearSelection: () -> Unit,
+        // --- SELECTION MENU PARAMETERS ---
+        showSelectionMoreMenu: Boolean,
+        onShowSelectionMoreMenu: () -> Unit,
+        onDismissSelectionMoreMenu: () -> Unit,
+        // --- Options Menu State ---
+        showOptionsMenuForFile: FileModel?,
+        onShowOptionsMenu: (FileModel) -> Unit,
+        onDismissOptionsMenu: () -> Unit,
+        onOpenFileClickAction: (FileModel) -> Unit,
+        onRenameFileClickAction: (FileModel) -> Unit,
+        onDeleteSelectedFiles: () -> Unit,
+        onDeleteFileClickAction: (FileModel) -> Unit,
+        onShareFiles: (FileModel?) -> Unit,
+        onShowProperties: (file: FileModel?) -> Unit,
+        sortMethod: SortMethod,
+        sortOrder: SortOrder,
+        onSortMethodChange: (SortMethod) -> Unit,
+        onSortOrderChange: (SortOrder) -> Unit,
+        showSortMenu: Boolean,
+        onShowSortMenuChange: (Boolean) -> Unit,
+        onToggleSplitScreen: () -> Unit,
+        isSplitScreenActive: Boolean
+    ) {
+        val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val isSelectionMode = selectedFiles.isNotEmpty()
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        // --- Back Button Handler ---
+        BackHandler(enabled = isSearchActive || isSelectionMode) {
+            when {
+                isSearchActive -> {
+                    onSearchActiveChange(false)
+                    onSearchQueryChange("")
+                }
+
+                isSelectionMode -> onClearSelection()
+            }
+        }
+
+        Scaffold(
+            topBar = {
+                AnimatedContent(
+                    targetState = isSelectionMode,
+                    label = "TopBarAnimation",
+                    transitionSpec = {
+                        if (targetState) {
+                            slideInVertically { height -> height } + fadeIn() togetherWith slideOutVertically { height -> -height } + fadeOut()
+                        } else {
+                            slideInVertically { height -> -height } + fadeIn() togetherWith slideOutVertically { height -> height } + fadeOut()
+                        }
+                    }
+                ) { isInSelectionMode ->
+                    if (isInSelectionMode) {
+                        // --- UI FOR SELECTION MODE ---
+                        TopAppBar(
+                            title = { Text("${selectedFiles.size} selected") },
+                            navigationIcon = {
+                                Row {
+                                    // Only show home button when not at root directory
+                                    if (currentPath != Environment.getExternalStorageDirectory().absolutePath) {
+                                        IconButton(
+                                            onClick = {
+                                                // Navigate to root directory
+                                                onFileClick(Environment.getExternalStorageDirectory().absolutePath)
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Home,
+                                                contentDescription = "Home",
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
+                                    }
+
+                                    // Back button
+                                    IconButton(
+                                        onClick = {
+                                            if (isSearchActive) {
+                                                onSearchActiveChange(false)
+                                                onSearchQueryChange("")
+                                            } else {
+                                                onNavigateUp()
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = if (isSearchActive) "Close Search" else "Navigate Up",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
+                            },
+                            actions = {
+                                IconButton(onClick = { /* TODO: Copy Action */ }) {
+                                    Icon(Icons.Filled.ContentCopy, contentDescription = "Copy")
+                                }
+                                IconButton(onClick = { /* TODO: Cut Action */ }) {
+                                    Icon(Icons.Filled.ContentCut, contentDescription = "Cut")
+                                }
+                                IconButton(onClick = { onDeleteSelectedFiles() }) {
+                                    Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                                }
+                                // The "More" menu button
+                                Box {
+                                    IconButton(onClick = { onShowSelectionMoreMenu() }) {
+                                        Icon(
+                                            Icons.Filled.MoreVert,
+                                            contentDescription = "More Options"
+                                        )
+                                    }
+                                    // The DropdownMenu for the "More" button
+                                    DropdownMenu(
+                                        expanded = showSelectionMoreMenu,
+                                        onDismissRequest = onDismissSelectionMoreMenu
+                                    ) {
+                                        // Group 1: Sharing and Actions
+                                        DropdownMenuItem(
+                                            text = { Text("Share") },
+                                            onClick = {
+                                                onShareFiles(showOptionsMenuForFile)
+                                                onDismissSelectionMoreMenu()
+                                            },
+                                            leadingIcon = { Icon(Icons.Filled.Share, "Share") }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Compress") },
+                                            onClick = {
+                                                // TODO: Implement Compress logic for selected files
+                                                onDismissSelectionMoreMenu()
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    Icons.Filled.FolderZip,
+                                                    "Compress"
+                                                )
+                                            }
+                                        )
+
+                                        // This is the separator for visual grouping
+                                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                                        // Group 2: Information
+                                        DropdownMenuItem(
+                                            text = { Text("Copy path") },
+                                            onClick = {
+                                                // TODO: Implement Copy Path logic (e.g., copy all paths to clipboard)
+                                                onDismissSelectionMoreMenu()
+                                            },
+                                            leadingIcon = { Icon(Icons.Filled.Link, "Copy path") }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Properties") },
+                                            onClick = {
+                                                onShowProperties(null)
+                                                onDismissSelectionMoreMenu()
+                                            },
+                                            leadingIcon = { Icon(Icons.Filled.Info, "Properties") }
+                                        )
+                                    }
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                        )
+                    } else {
+                        // --- NORMAL/SEARCH MODE APP BAR ---
+                        TopAppBar(
+                            title = {
+                                AnimatedContent(
+                                    targetState = isSearchActive,
+                                    label = "SearchTitleAnimation"
+                                ) { searchIsActive ->
+                                    if (searchIsActive) {
+                                        TextField(
+                                            value = searchQuery,
+                                            onValueChange = onSearchQueryChange,
+                                            placeholder = { Text("Search...") },
+                                            singleLine = true,
+                                            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onPrimaryContainer),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .focusRequester(focusRequester),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = Color.Transparent,
+                                                unfocusedContainerColor = Color.Transparent,
+                                                disabledContainerColor = Color.Transparent,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent,
+                                                cursorColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        )
+                                    } else {
+                                        Column(modifier = Modifier.fillMaxWidth()) {
+                                            Text(
+                                                text = File(currentPath).name.ifBlank { "Internal Storage" },
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = "${files.size} item${if (files.size != 1) "s" else ""}",
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                                    alpha = 0.8f
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            navigationIcon = {
+                                if (isSearchActive) {
+                                    IconButton(onClick = {
+                                        onSearchActiveChange(false)
+                                        onSearchQueryChange("")
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Close Search"
+                                        )
+                                    }
+                                } else {
+                                    Row {
+                                        // Home button - only show when not in selection mode
+                                        if (!isSelectionMode) {
+                                            IconButton(
+                                                onClick = {
+                                                    isAtRoot = true
+                                                    onFileClick(Environment.getExternalStorageDirectory().absolutePath)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Home,
+                                                    contentDescription = "Home"
+                                                )
+                                            }
+                                        }
+                                        
+                                        // Back button
+                                        IconButton(onClick = { onNavigateUp() }) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = "Navigate Up"
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            actions = {
+                                AnimatedContent(
+                                    targetState = isSearchActive,
+                                    label = "SearchActionsAnimation"
+                                ) { searchIsActive ->
+                                    Row {
+                                        if (searchIsActive) {
+                                            if (searchQuery.isNotEmpty()) {
+                                                IconButton(onClick = { onSearchQueryChange("") }) {
+                                                    Icon(
+                                                        Icons.Filled.Clear,
+                                                        contentDescription = "Clear Search"
+                                                    )
+                                                }
+                                            }
+                                        } else {
+                                            IconButton(onClick = { onSearchActiveChange(true) }) {
+                                                Icon(
+                                                    Icons.Filled.Search,
+                                                    contentDescription = "Search Files"
+                                                )
+                                            }
+                                            Box {
+                                                IconButton(onClick = { onShowSortMenuChange(true) }) {
+                                                    Icon(
+                                                        Icons.AutoMirrored.Filled.Sort,
+                                                        contentDescription = "Sort Files"
+                                                    )
+                                                }
+                                                DropdownMenu(
+                                                    expanded = showSortMenu,
+                                                    onDismissRequest = { onShowSortMenuChange(false) }
+                                                ) {
+                                                    Text(
+                                                        "Sort by",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 16.dp,
+                                                            vertical = 8.dp
+                                                        ),
+                                                        style = MaterialTheme.typography.titleSmall
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Name") },
+                                                        onClick = {
+                                                            onSortMethodChange(SortMethod.NAME); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortMethod == SortMethod.NAME) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Date") },
+                                                        onClick = {
+                                                            onSortMethodChange(SortMethod.DATE); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortMethod == SortMethod.DATE) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Size") },
+                                                        onClick = {
+                                                            onSortMethodChange(SortMethod.SIZE); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortMethod == SortMethod.SIZE) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Type (Extension)") },
+                                                        onClick = {
+                                                            onSortMethodChange(SortMethod.TYPE); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortMethod == SortMethod.TYPE) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                    HorizontalDivider(
+                                                        modifier = Modifier.padding(
+                                                            vertical = 4.dp
+                                                        )
+                                                    )
+                                                    Text(
+                                                        "Order",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 16.dp,
+                                                            vertical = 8.dp
+                                                        ),
+                                                        style = MaterialTheme.typography.titleSmall
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Ascending") },
+                                                        onClick = {
+                                                            onSortOrderChange(SortOrder.ASCENDING); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortOrder == SortOrder.ASCENDING) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Descending") },
+                                                        onClick = {
+                                                            onSortOrderChange(SortOrder.DESCENDING); onShowSortMenuChange(
+                                                            false
+                                                        )
+                                                        },
+                                                        trailingIcon = {
+                                                            if (sortOrder == SortOrder.DESCENDING) Icon(
+                                                                Icons.Filled.Check,
+                                                                contentDescription = "Selected"
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                            IconButton(onClick = { onViewModeChange(if (viewMode == ViewMode.LIST) ViewMode.GRID else ViewMode.LIST) }) {
+                                                Icon(
+                                                    imageVector = if (viewMode == ViewMode.LIST) Icons.Filled.GridView else Icons.AutoMirrored.Filled.ViewList,
+                                                    contentDescription = "Toggle View"
+                                                )
+                                            }
+                                            IconButton(onClick = { onToggleSplitScreen() }) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Splitscreen,
+                                                    contentDescription = "Toggle Split Screen"
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                        )
+                    }
+                }
+            },
+            modifier = modifier,
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { innerPadding ->
+            // Add this LaunchedEffect right after the Scaffold's content starts
+            LaunchedEffect(clipboardData) {
+                clipboardData?.let { (sourcePath, isCut) ->
+                    val sourceFile = File(sourcePath)
+                    val actionText = if (isCut) "Cut" else "Copied"
+                    val result = try {
+                        snackbarHostState.showSnackbar(
+                            message = "$actionText: ${sourceFile.name}",
+                            actionLabel = "Paste",
+                            duration = SnackbarDuration.Indefinite, // Changed from Short to Indefinite
+                            withDismissAction = true // Adds a close button
+                        )
+                    } catch (e: Exception) {
+                        Log.e("SnackbarError", "Error showing snackbar", e)
+                        return@LaunchedEffect
+                    }
+
+                    when (result) {
+                        SnackbarResult.ActionPerformed -> {
+                            // Pass the snackbarHostState to pasteFromClipboard
+                            pasteFromClipboard(snackbarHostState = snackbarHostState)
+                        }
+
+                        SnackbarResult.Dismissed -> {
+                            // User swiped the snackbar away or tapped the close button
+                        }
+                    }
+                }
+            }
+            // This effect manages the keyboard automatically
+            LaunchedEffect(isSearchActive) {
+                if (isSearchActive) {
+                    focusRequester.requestFocus()
+                } else {
+                    keyboardController?.hide()
+                }
+            }
+
+            // --- UPGRADED File List ---
+            if (isSplitScreenActive) {
+                // Split screen view
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    // Left panel (current directory)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        if (viewMode == ViewMode.LIST) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(files, key = { it.path }) { fileModel ->
+                                    FileItem(
+                                        fileModel = fileModel,
+                                        isSelected = selectedFiles.contains(fileModel),
+                                        onItemClick = { fm ->
+                                            if (isSelectionMode) onSelectionChange(fm) else if (fm.isDirectory) onFileClick(
+                                                fm.path
+                                            ) else onOpenFileClickAction(fm)
+                                        },
+                                        onItemLongClick = { fm -> onSelectionChange(fm) },
+                                        onOptionsMenuClick = { fm -> onShowOptionsMenu(fm) }
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 120.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(4.dp)
+                            ) {
+                                items(files, key = { it.path }) { fileModel ->
+                                    GridItem(
+                                        fileModel = fileModel,
+                                        isSelected = selectedFiles.contains(fileModel),
+                                        onItemClick = { fm ->
+                                            if (isSelectionMode) onSelectionChange(fm) else if (fm.isDirectory) onFileClick(
+                                                fm.path
+                                            ) else onOpenFileClickAction(fm)
+                                        },
+                                        onItemLongClick = { fm -> onSelectionChange(fm) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider between panels
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp),
+                        thickness = DividerDefaults.Thickness,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    // Right panel (default to parent directory or a default location)
+                    val rightPanelPath = remember { File(currentPath).parent ?: "/" }
+                    val rightPanelFiles = remember(rightPanelPath, sortMethod, sortOrder) {
+                        FileUtils.getFiles(rightPanelPath)?.let { files ->
+                            val sorted = when (sortMethod) {
+                                SortMethod.NAME -> files.sortedBy { it.name.lowercase(Locale.getDefault()) }
+                                SortMethod.DATE -> files.sortedBy { it.lastModified }
+                                SortMethod.SIZE -> files.sortedBy { it.size }
+                                SortMethod.TYPE -> files.sortedBy {
+                                    it.name.substringAfterLast(
+                                        '.',
+                                        ""
+                                    ).lowercase(Locale.getDefault())
+                                }
+                            }
+                            if (sortOrder == SortOrder.DESCENDING) sorted.reversed() else sorted
+                        } ?: emptyList()
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        if (viewMode == ViewMode.LIST) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(rightPanelFiles, key = { it.path }) { fileModel ->
+                                    FileItem(
+                                        fileModel = fileModel,
+                                        isSelected = false,
+                                        onItemClick = { fm ->
+                                            if (fm.isDirectory) {
+                                                // In a real implementation, you'd update the right panel's path
+                                                // For now, we'll just open the file
+                                                onOpenFileClickAction(fm)
+                                            } else {
+                                                onOpenFileClickAction(fm)
+                                            }
+                                        },
+                                        onItemLongClick = { /* No action for right panel in this implementation */ },
+                                        onOptionsMenuClick = { /* No options menu for right panel in this implementation */ }
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 120.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(4.dp)
+                            ) {
+                                items(rightPanelFiles, key = { it.path }) { fileModel ->
+                                    GridItem(
+                                        fileModel = fileModel,
+                                        isSelected = false,
+                                        onItemClick = { fm ->
+                                            if (fm.isDirectory) {
+                                                // In a real implementation, you'd update the right panel's path
+                                                // For now, we'll just open the file
+                                                onOpenFileClickAction(fm)
+                                            } else {
+                                                onOpenFileClickAction(fm)
+                                            }
+                                        },
+                                        onItemLongClick = { /* No action for right panel in this implementation */ }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Single panel view
+                if (viewMode == ViewMode.LIST) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        items(files, key = { it.path }) { fileModel ->
+                            FileItem(
+                                fileModel = fileModel,
+                                isSelected = selectedFiles.contains(fileModel),
+                                onItemClick = { fm ->
+                                    if (isSelectionMode) onSelectionChange(fm) else if (fm.isDirectory) onFileClick(
+                                        fm.path
+                                    ) else onOpenFileClickAction(fm)
+                                },
+                                onItemLongClick = { fm -> onSelectionChange(fm) },
+                                onOptionsMenuClick = { fm -> onShowOptionsMenu(fm) }
+                            )
+                        }
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 120.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentPadding = PaddingValues(4.dp)
+                    ) {
+                        items(files, key = { it.path }) { fileModel ->
+                            GridItem(
+                                fileModel = fileModel,
+                                isSelected = selectedFiles.contains(fileModel),
+                                onItemClick = { fm ->
+                                    if (isSelectionMode) onSelectionChange(fm) else if (fm.isDirectory) onFileClick(
+                                        fm.path
+                                    ) else onOpenFileClickAction(fm)
+                                },
+                                onItemLongClick = { fm -> onSelectionChange(fm) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (!isSelectionMode) {
+                DropdownMenu(
+                    expanded = (showOptionsMenuForFile != null),
+                    onDismissRequest = onDismissOptionsMenu
+                ) {
+                    val file = showOptionsMenuForFile ?: return@DropdownMenu
+                    DropdownMenuItem(
+                        text = { Text("Copy") },
+                        onClick = {
+                            copyToClipboard(file)
+                            onDismissOptionsMenu()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy"
+                            )
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Cut") },
+                        onClick = {
+                            cutToClipboard(file)
+                            onDismissOptionsMenu()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.ContentCut,
+                                contentDescription = "Cut"
+                            )
+                        }
+                    )
+
+                    // Add paste option if clipboard has data
+                    if (clipboardData != null) {
+                        val (sourcePath, isCut) = clipboardData!!
+                        val sourceFile = File(sourcePath)
+                        val actionText = if (isCut) "Cut" else "Copied"
+                        val icon =
+                            if (isCut) Icons.Default.ContentCut else Icons.Default.ContentCopy
+
+                        // Show a chip with the action and filename
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .height(32.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = actionText,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "$actionText: ${sourceFile.name}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        // Paste button
+                        IconButton(
+                            onClick = {
+                                // Pass the snackbarHostState to pasteFromClipboard
+                                pasteFromClipboard(File(currentPathState), snackbarHostState)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentPaste,
+                                contentDescription = "Paste",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text("Paste") },
+                            onClick = {
+                                pasteFromClipboard(File(currentPathState), snackbarHostState)
+                                onDismissOptionsMenu()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.ContentPaste,
+                                    contentDescription = "Paste"
+                                )
+                            }
+                        )
+                        HorizontalDivider(
+                            Modifier,
+                            DividerDefaults.Thickness,
+                            DividerDefaults.color
+                        )
+                    }
+                    DropdownMenuItem(
+                        text = { Text("Open") },
+                        onClick = { onOpenFileClickAction(file); onDismissOptionsMenu() },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Launch, "Open") })
+                    DropdownMenuItem(
+                        text = { Text("Rename") },
+                        onClick = {
+                            showOptionsMenuForFile?.let { file ->
+                                showRenameDialog(file)
+                                onDismissOptionsMenu()
+                            } ?: run {
+                                onDismissOptionsMenu()
+                            }
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.DriveFileRenameOutline,
+                                contentDescription = "Rename"
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Share") },
+                        onClick = {
+                            onShareFiles(file)
+                            onDismissOptionsMenu()
+                        },
+                        leadingIcon = { Icon(Icons.Filled.Share, "Share") }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    DropdownMenuItem(
+                        text = { Text("Add to Home screen") },
+                        onClick = { onDismissOptionsMenu() },
+                        leadingIcon = { Icon(Icons.Filled.AddHome, "Add to Home screen") })
+                    DropdownMenuItem(
+                        text = { Text("Create shortcut") },
+                        onClick = { onDismissOptionsMenu() },
+                        leadingIcon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Shortcut,
+                                "Create shortcut"
+                            )
+                        })
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    DropdownMenuItem(
+                        text = { Text("Copy path") },
+                        onClick = {
+                            copyPathToClipboard(
+                                showOptionsMenuForFile?.path ?: return@DropdownMenuItem
+                            )
+                            onDismissOptionsMenu()
+                        },
+                        leadingIcon = { Icon(Icons.Filled.Link, "Copy path") })
+                    DropdownMenuItem(
+                        text = { Text("Properties") },
+                        onClick = {
+                            onShowProperties(file)
+                            onDismissOptionsMenu()
+                        },
+                        leadingIcon = { Icon(Icons.Filled.Info, "Properties") }
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun RenameDialog(
+        currentFile: FileModel,
+        newFileName: String,
+        onNewFileNameChange: (String) -> Unit,
+        onDismiss: () -> Unit,
+        onConfirm: () -> Unit,
+        isNameValid: Boolean
+    ) {
+        val hasExtension = currentFile.name.contains('.')
+        val extension = if (hasExtension) ".${currentFile.name.substringAfterLast('.')}" else ""
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Rename ${currentFile.name}") },
+            text = {
+                Column {
+                    Text("Enter new name:")
+                    OutlinedTextField(
+                        value = newFileName,
+                        onValueChange = onNewFileNameChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        suffix = {
+                            if (hasExtension) {
+                                Text(
+                                    text = extension,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    )
+                    if (hasExtension) {
+                        Text(
+                            text = "Extension will be preserved: $extension",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = onConfirm,
+                    enabled = isNameValid
+                ) {
+                    Text("Rename")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun CreateFolderDialog(
+        folderName: String,
+        onFolderNameChange: (String) -> Unit,
+        onDismissRequest: () -> Unit,
+        onCreateClick: () -> Unit,
+        onCancelClick: () -> Unit
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = { Text("Create New Folder") },
+            text = {
+                OutlinedTextField(
+                    value = folderName,
+                    onValueChange = onFolderNameChange,
+                    label = { Text("Folder Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (folderName.isNotBlank()) {
+                            onCreateClick()
+                        }
+                        // Optionally, you could show a Toast if folderName is blank
+                    },
+                    enabled = folderName.isNotBlank() // Enable button only if name is not blank
+                ) {
+                    Text("Create")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onCancelClick) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    @Composable
+    fun ConfirmDeleteDialog(
+        file: FileModel,
+        onConfirm: () -> Unit,
+        onDismiss: () -> Unit
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Confirm Delete") },
+            text = { Text("Are you sure you want to delete '${file.name}'?") },
+            confirmButton = {
+                Button(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun FileItem(
+        fileModel: FileModel,
+        isSelected: Boolean,
+        onItemClick: (FileModel) -> Unit,
+        onItemLongClick: (FileModel) -> Unit,
+        onOptionsMenuClick: (FileModel) -> Unit
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
+                .combinedClickable(
+                    onClick = { onItemClick(fileModel) },
+                    onLongClick = { onItemLongClick(fileModel) }
+                )
+                .padding(start = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = getFileIcon(fileModel),
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = fileModel.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val secondaryTextStyle = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (fileModel.isDirectory) {
+                        Text(
+                            text = fileModel.childrenCount?.let { count ->
+                                if (count > 0) "$count item${if (count != 1) "s" else ""}" else "Empty folder"
+                            } ?: "Folder",
+                            style = secondaryTextStyle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text("  •  ", style = secondaryTextStyle)
+                    } else {
+                        Text(
+                            text = fileModel.size.toReadableFileSizeString(),
+                            style = secondaryTextStyle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text("  •  ", style = secondaryTextStyle)
+                    }
+                    Text(
+                        text = fileModel.lastModified.toFormattedDateString("dd MMM yyyy"),
+                        style = secondaryTextStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            // This is the three-dots menu, only for list item.
+            IconButton(onClick = { onOptionsMenuClick(fileModel) }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "More options for ${fileModel.name}",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant // Or choose another appropriate color
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun GridItem(
+        fileModel: FileModel,
+        isSelected: Boolean,
+        onItemClick: (FileModel) -> Unit,
+        onItemLongClick: (FileModel) -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        Card(
+            modifier = modifier
+                .padding(4.dp)
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = { onItemClick(fileModel) },
+                    onLongClick = { onItemLongClick(fileModel) } // <-- A long press now starts selection mode
+                ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            border = if (isSelected) BorderStroke(
+                2.dp,
+                MaterialTheme.colorScheme.primary
+            ) else null // <-- Visual feedback for selection
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .height(140.dp)
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = getFileIcon(fileModel),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = if (fileModel.isDirectory) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = fileModel.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun getFileIcon(fileModel: FileModel): ImageVector {
+        // This function remains largely the same, ensure all icons used are Material Design icons
+        // and available in your dependencies.
+        return when {
+            fileModel.isDirectory -> Icons.Filled.Folder
+            else -> {
+                val extension = fileModel.name.substringAfterLast('.', "").lowercase()
+                when (extension) {
+                    "jpg", "jpeg", "png", "gif", "bmp", "webp" -> Icons.Filled.Image
+                    "mp3", "wav", "aac", "ogg", "m4a", "flac" -> Icons.Filled.MusicNote
+                    "mp4", "mkv", "avi", "mov", "webm", "3gp" -> Icons.Filled.VideoFile // Or OndemandVideo
+                    "pdf" -> Icons.Filled.PictureAsPdf
+                    "doc", "docx" -> Icons.Filled.Description // Or Article
+                    "xls", "xlsx" -> Icons.Filled.Analytics // Or TableChart
+                    "ppt", "pptx" -> Icons.Filled.Slideshow
+                    "txt", "log", "md" -> Icons.AutoMirrored.Filled.Notes // Or TextSnippet
+                    "zip", "rar", "7z", "tar", "gz" -> Icons.Filled.Archive
+                    "apk" -> Icons.Filled.Android // Or Adb
+                    "html", "htm", "xml", "json" -> Icons.Filled.Code
+                    "java", "kt", "js", "py", "c", "cpp", "cs", "swift" -> Icons.Filled.DataObject // Or Terminal
+                    else -> Icons.AutoMirrored.Filled.InsertDriveFile
+                }
+            }
+        }
+    }
+
+
+    @Composable
+    fun PropertiesDialog(
+        selectedFiles: Set<FileModel>,
+        fileToShow: FileModel? = null,
+        onDismissRequest: () -> Unit
+    ) {
+        // Determine what to show: the single file if provided, otherwise the selection.
+        val finalFile = fileToShow
+        val finalSelection = if (finalFile != null) setOf(finalFile) else selectedFiles
+
+        if (finalSelection.isEmpty()) return
+
+        val singleFile = if (finalSelection.size == 1) finalSelection.first() else null
+
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = {
+                Text(
+                    if (singleFile != null) "Properties"
+                    else "Properties for ${finalSelection.size} items"
+                )
+            },
+            text = {
+                if (singleFile != null) {
+                    // --- UI for a SINGLE file ---
+                    PropertiesContent(
+                        items = listOf(
+                            "Name" to singleFile.name,
+                            "Path" to singleFile.path,
+                            "Size" to singleFile.size.toReadableFileSizeString(),
+                            "Last Modified" to singleFile.lastModified.toFormattedDateString()
+                        )
+                    )
+                } else {
+                    // --- UI for MULTIPLE files ---
+                    val totalSize = finalSelection.sumOf { it.size }
+                    val folderCount = finalSelection.count { it.isDirectory }
+                    val fileCount = finalSelection.size - folderCount
+                    PropertiesContent(
+                        items = listOf(
+                            "Total items" to finalSelection.size.toString(),
+                            "Files" to fileCount.toString(),
+                            "Folders" to folderCount.toString(),
+                            "Total size" to totalSize.toReadableFileSizeString()
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    // A helper composable to keep the layout consistent
+    @Composable
+    private fun PropertiesContent(items: List<Pair<String, String>>) {
+        LazyColumn {
+            items(items) { (label, value) ->
+                Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                    Text(
+                        text = "$label:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.width(120.dp) // Aligns the values
+                    )
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+
+    // --- Previews ---
+    @Preview(showBackground = true, name = "FileItem - Not Selected")
+    @Composable
+    fun PreviewFileItemFile() {
+        TabFileExplorerTheme {
+            FileItem(
+                fileModel = FileModel(
+                    "My Document.pdf",
+                    "/path/to/doc.pdf",
+                    false,
+                    12345,
+                    System.currentTimeMillis()
+                ),
+                isSelected = false, onItemClick = {}, onItemLongClick = {}, onOptionsMenuClick = {}
+            )
+        }
+    }
+
+    @Preview(showBackground = true, name = "FileItem - Selected")
+    @Composable
+    fun PreviewFileItemSelected() {
+        TabFileExplorerTheme {
+            FileItem(
+                fileModel = FileModel(
+                    "Holiday Pictures",
+                    "/path/to/pics",
+                    true,
+                    0,
+                    System.currentTimeMillis()
+                ),
+                isSelected = true, onItemClick = {}, onItemLongClick = {}, onOptionsMenuClick = {}
+            )
+        }
+    }
+}

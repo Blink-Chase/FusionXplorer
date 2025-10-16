@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Allow access to the root of external storage -->
+    <external-path
+        name="external_files"
+        path="." />
+    <!-- If you also need to access files in your app's specific directories -->
+    <!-- <files-path name="internal_files" path="." /> -->
+    <!-- <cache-path name="cache_files" path="." /> -->
+</paths>
