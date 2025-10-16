@@ -1,6 +1,7 @@
-package com.example.tabfileexplorer
+package com.blinkchase.fusionxplorer
 
 import android.Manifest
+import android.R
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -163,9 +164,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.tabfileexplorer.data.AppSettings
-import com.example.tabfileexplorer.ui.screens.SettingsScreen
-import com.example.tabfileexplorer.ui.theme.TabFileExplorerTheme
+import com.blinkchase.fusionxplorer.NavRoutes.STORAGE_ANALYSIS
+import com.blinkchase.fusionxplorer.data.AppSettings
+import com.blinkchase.fusionxplorer.model.StorageStats
+import com.blinkchase.fusionxplorer.ui.screens.SettingsScreen
+import com.blinkchase.fusionxplorer.ui.screens.StorageAnalysisScreen
+import com.blinkchase.fusionxplorer.ui.theme.TabFileExplorerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -183,6 +187,7 @@ object NavRoutes {
     const val HOME = "home"
     const val FILE_EXPLORER = "file_explorer"
     const val PATH_ARG = "path"
+    const val STORAGE_ANALYSIS = "storage_analysis"
     const val SETTINGS = "settings"
     const val ABOUT = "about"
 }
@@ -199,20 +204,13 @@ enum class SortOrder {
     ASCENDING, DESCENDING
 }
 
-data class StorageStats(
-    val totalSpace: Long,
-    val freeSpace: Long
-) {
-    val usedSpace: Long
-        get() = totalSpace - freeSpace
-}
-
 // Data classes
 data class StorageOption(
     val name: String,
     val path: String,
     val icon: ImageVector,
-    val iconTint: Color
+    val iconTint: Color,
+    val stats: StorageStats = StorageStats(totalSpace = 0L, freeSpace = 0L)
 )
 
 private const val ROOT_PATH = "/storage/emulated/0"
@@ -262,7 +260,7 @@ class MainActivity : ComponentActivity() {
     private var sortMethod by mutableStateOf(SortMethod.NAME)
     private var sortOrder by mutableStateOf(SortOrder.ASCENDING)
     private var showSortMenu by mutableStateOf(false)
-    private var isSplitScreenActive by mutableStateOf(false)
+    /* private var isSplitScreenActive by mutableStateOf(false) */
     private var clipboardData: Pair<String, Boolean>? = null // path to file and isCut flag
     private var showRenameDialog by mutableStateOf(false)
     private var newFileName by mutableStateOf("")
@@ -272,7 +270,7 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         // Keep the splash screen on-screen until the app is ready
         splashScreen.setKeepOnScreenCondition { true }
-        window.setBackgroundDrawableResource(android.R.color.transparent)
+        window.setBackgroundDrawableResource(R.color.transparent)
         window.setWindowAnimations(0)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -382,9 +380,11 @@ class MainActivity : ComponentActivity() {
                         ) {
                             SettingsScreen(
                                 onBackClick = { navController.popBackStack() },
+                                onStorageAnalysisClick = {
+                                    navController.navigate(STORAGE_ANALYSIS)
+                                },
                                 onStorageClick = {
                                     // Handle storage management
-                                    // navController.navigate("storage_management")
                                 },
                                 onCacheClear = {
                                     // Clear cache implementation
@@ -395,6 +395,19 @@ class MainActivity : ComponentActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
+                            )
+                        }
+                    }
+
+                    // Route for the "storage analysis" screen
+                    composable(STORAGE_ANALYSIS) {
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            StorageAnalysisScreen(
+                                onBackClick = { navController.popBackStack() }
                             )
                         }
                     }
@@ -656,8 +669,6 @@ class MainActivity : ComponentActivity() {
     private fun NormalModeTopBar(
         currentPath: String,
         filesCount: Int,
-        isAtBasePath: Boolean,
-        basePath: String,
         isAtInternalRoot: Boolean,
         isSearchActive: Boolean,
         searchQuery: String,
@@ -2205,8 +2216,6 @@ class MainActivity : ComponentActivity() {
                         NormalModeTopBar(
                             currentPath = currentPath,
                             filesCount = files.size,
-                            isAtBasePath = isAtBasePath,
-                            basePath = basePath,
                             isAtInternalRoot = isAtInternalRoot,
                             isSearchActive = isSearchActive,
                             searchQuery = searchQuery,
