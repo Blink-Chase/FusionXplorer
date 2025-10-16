@@ -1,6 +1,7 @@
-package com.example.tabfileexplorer.di
+package com.blinkchase.fusionxplorer.di
 
-import com.example.tabfileexplorer.ui.viewmodel.SettingsViewModel
+import com.blinkchase.fusionxplorer.data.AppSettings
+import com.blinkchase.fusionxplorer.ui.viewmodel.SettingsViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +14,7 @@ object ViewModelModule {
     
     @Provides
     @ViewModelScoped
-    fun provideSettingsViewModel(settings: com.example.tabfileexplorer.data.AppSettings): SettingsViewModel {
+    fun provideSettingsViewModel(settings: AppSettings): SettingsViewModel {
         return SettingsViewModel(settings)
     }
 }

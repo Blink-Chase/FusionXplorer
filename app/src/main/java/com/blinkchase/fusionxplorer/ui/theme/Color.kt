@@ -1,4 +1,4 @@
-package com.example.tabfileexplorer.ui.theme
+package com.blinkchase.fusionxplorer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

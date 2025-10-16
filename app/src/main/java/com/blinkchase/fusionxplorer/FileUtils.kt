@@ -1,4 +1,4 @@
-package com.example.tabfileexplorer // Make sure this matches your app's package name
+package com.blinkchase.fusionxplorer // Make sure this matches your app's package name
 
 import android.annotation.SuppressLint
 import android.os.Environment
